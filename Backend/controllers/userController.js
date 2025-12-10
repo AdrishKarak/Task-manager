@@ -36,18 +36,12 @@ const getUsers = async (req, res) => {
 const getUserById = async (req, res) => {
     try {
 
-    } catch (error) {
-        res.status(500).json({message: "Internal server error" , error: error.message});;
-    }
-};
+        const user = await User.findById(req.params.id).select("-password");
+        if(!user){
+            return res.status(404).json({message: "User not found"});
+        }
 
-
-//@dsec Delete a user (admin only)
-//@route DELETE /api/users/:id
-//access Private(admin) only
-
-const deleteUser = async (req, res) => {
-    try {
+        res.json(user);
 
     } catch (error) {
         res.status(500).json({message: "Internal server error" , error: error.message});;
@@ -55,7 +49,9 @@ const deleteUser = async (req, res) => {
 };
 
 
-module.exports = {getUsers, getUserById, deleteUser};
+
+
+module.exports = {getUsers, getUserById};
 
 
 
