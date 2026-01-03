@@ -11,6 +11,8 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
 
+    const { updateUser } = useContext(UserContext);
+
     const navigate = useNavigate();
 
     //Handle Login form submit 
@@ -39,6 +41,7 @@ const Login = () => {
 
             if (token) {
                 localStorage.setItem("token", token);
+                updateUser(response.data);
 
                 //Redirect based on role
                 if (role === "admin") {
