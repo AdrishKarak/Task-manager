@@ -10,7 +10,7 @@ import CreateTask from "./pages/Admin/CreateTask.jsx";
 import ManageUsers from "./pages/Admin/ManageUsers.jsx";
 import MyTasks from "./pages/User/MyTasks.jsx";
 import ViewTasksdetails from "./pages/User/ViewTasksdetails.jsx";
-import UserProvider, { UserContext } from '../context/userContext.jsx';
+import UserProvider, { UserContext } from './context/userContext.jsx';
 import { useContext } from 'react';
 
 const App = () => {
