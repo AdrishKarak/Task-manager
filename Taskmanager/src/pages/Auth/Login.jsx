@@ -14,7 +14,6 @@ const Login = () => {
     const [error, setError] = useState(null);
 
     const { updateUser } = useContext(UserContext);
-
     const navigate = useNavigate();
 
     //Handle Login form submit 
