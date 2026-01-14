@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { useUserAuth } from '../../hooks/useUserAuth';
-
+import DashboardLayout from '../../Components/layouts/DashboardLayout';
+import { UserContext } from '../../context/userContext';
 const DashboardAdmin = () => {
     useUserAuth();
+    const { user } = useContext(UserContext);
     return (
-        <div>Dashboard</div>
+        <DashboardLayout activeMenu="Dashboard">
+            Dashboard
+        </DashboardLayout>
     );
 };
 

@@ -49,7 +49,7 @@ const registerUser = async (req, res) => {
 
         // Determine Role (admin if the correct token is provided)
         let role = "member";
-        if (adminInviteToken && adminInviteToken === process.env.ADMIN_INVITE_TOKEN) {
+        if (adminInviteToken && adminInviteToken?.trim() === process.env.ADMIN_INVITE_TOKEN?.trim()) {
             role = "admin";
         }
 

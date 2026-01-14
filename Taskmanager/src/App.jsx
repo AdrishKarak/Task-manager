@@ -18,7 +18,7 @@ const App = () => {
     return (
         <UserProvider>
             <div>
-                <Snowfall />
+                <Snowfall color="rgba(239,68,68,0.75)" />
                 <Router>
                     <Routes>
                         <Route path='/login' element={<Login />} />

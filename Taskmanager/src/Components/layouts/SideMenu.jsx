@@ -32,9 +32,34 @@ const SideMenu = ({ activeMenu }) => {
 
     return (
 
-        <div>
+        <div className='w-64 h-[calc(100vh-61px)] bg-white border-r border-gray-900 sticky top-[61px] z-20 shadow-[2px_0_8px_rgba(0,0,0,0.12)]'>
+            <div className='flex flex-col items-center justify-center mb-7 pt-5' >
+                <div className='relative'>
+                    <img src={user?.profileImageUrl || ""} alt="Profile" className='w-20 h-20 rounded-full bg-slate-400' />
+                </div>
 
-            sidemenu
+                {user?.role === "admin" && (
+                    <div className='text-[10px] text-white bg-blue-400 px-3 py-0.5 rounded mt-1 ' >
+                        Admin
+                    </div>
+                )}
+
+                <h5 className='mt-3 text-gray-950 font-medium leading-6'>
+                    {user?.name || ""}
+                </h5>
+                <p className='text-gray-500 text-[12px]'>
+                    {user?.email || ""}
+                </p>
+            </div>
+
+            {sideMenuData.map((item, index) => (
+                <button key={`menu_${index}`} className={`w-full flex items-center gap-4 text-[15px] ${activeMenu === item.label ? "text-blue-400 bg-linear-to-r from-blue-50/40 to-blue-100/50 border-r-3" : ""
+                    } py-3 px-6 mb-3 cursor-pointer transition-all duration-300 ease-in-out hover:bg-blue-50/50`}
+                    onClick={() => handleClick(item.path)}>
+                    <item.icon className='text-xl' />
+                    <span>{item.label}</span>
+                </button>
+            ))}
         </div>
     );
 };
