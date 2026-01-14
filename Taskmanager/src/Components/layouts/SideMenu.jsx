@@ -3,6 +3,7 @@ import { UserContext } from '../../context/userContext';
 import { useNavigate } from 'react-router-dom';
 import { SIDE_MENU_DATA, SIDE_MENU_USER_DATA } from '../../utils/data';
 
+
 const SideMenu = ({ activeMenu }) => {
     const { user, clearUser } = useContext(UserContext);
     const [sideMenuData, setSideMenuData] = useState([]);
@@ -30,7 +31,9 @@ const SideMenu = ({ activeMenu }) => {
     }, [user]);
 
     return (
+
         <div>
+
             sidemenu
         </div>
     );
