@@ -6,13 +6,13 @@
 
 @theme {
     --font-display: 'Ubuntu', sans-serif;
-    --breakpoint-3xl: 1920px ;
+    --breakpoint-3xl: 1920px;
     --color-primary: #1368EC;
 }
 
 @layer base {
-    html{
-        font-family: 'Ubuntu', sans-serif ;
+    html {
+        font-family: 'Ubuntu', sans-serif;
     }
 
     body {
@@ -22,10 +22,13 @@
 }
 
 .input-box {
-    @apply w-full flex justify-between gap-3 text-sm text-black bg-slate-100/50 rounded px-4 py-3 mb-4 mt-3 border border-slate-200 outline-none ; 
+    @apply w-full flex justify-between gap-3 text-sm text-black bg-slate-100/50 rounded px-4 py-3 mb-4 mt-3 border border-slate-200 outline-none;
 }
 
-.btn-primary{
-    @apply w-full text-sm text-white font-medium bg-blue-400 shadow-lg shadow-blue-600/5 p-[10px] rounded-md my-1 hover:bg-blue-500  hover:text-blue-100 cursor-pointer
+.btn-primary {
+    @apply w-full text-sm text-white font-medium bg-blue-400 shadow-lg shadow-blue-600/5 p-[10px] rounded-md my-1 hover:bg-blue-500 hover:text-blue-100 cursor-pointer
 }
 
+.card {
+    @apply bg-white border border-gray-300 rounded-2xl p-6 shadow-md shadow-black/10;
+}

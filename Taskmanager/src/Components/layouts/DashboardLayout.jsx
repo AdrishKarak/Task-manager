@@ -1,26 +1,33 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { UserContext } from '../../context/userContext';
 import Navbar from './Navbar';
 import SideMenu from './SideMenu';
 
 const DashboardLayout = ({ children, activeMenu }) => {
     const { user } = useContext(UserContext);
-    return (
-        <div className=''>
-            <Navbar activeMenu={activeMenu} />
+    const [openSideMenu, setOpenSideMenu] = useState(false);
 
-            {
-                user && (
-                    <div className='flex'>
-                        <div className='max-[1000px]:hidden'>
-                            <SideMenu activeMenu={activeMenu} />
-                        </div>
-                        <div className='grow mx-5'>
-                            {children}
-                        </div>
+    return (
+        <div>
+            <Navbar
+                openSideMenu={openSideMenu}
+                setOpenSideMenu={setOpenSideMenu}
+            />
+
+            {user && (
+                <div className="relative flex">
+                    {/* SIDEBAR */}
+                    <SideMenu
+                        activeMenu={activeMenu}
+                        isOpen={openSideMenu}
+                    />
+
+                    {/* MAIN CONTENT */}
+                    <div className="flex-1 mx-5">
+                        {children}
                     </div>
-                )
-            }
+                </div>
+            )}
         </div>
     );
 };
