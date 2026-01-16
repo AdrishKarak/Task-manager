@@ -30,5 +30,5 @@
 }
 
 .card {
-    @apply bg-white border border-gray-300 rounded-2xl p-6 shadow-md shadow-black/10;
+    @apply bg-white border border-gray-300/50 rounded-2xl p-6 shadow-md shadow-black/10;
 }
