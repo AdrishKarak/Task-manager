@@ -3,7 +3,7 @@ import DashboardLayout from '../../Components/layouts/DashboardLayout';
 
 const CreateTask = () => {
     return (
-        <DashboardLayout activeMenu="create-tasks">Create Task</DashboardLayout>
+        <DashboardLayout activeMenu="Create Task">Create Task</DashboardLayout>
     );
 };
 

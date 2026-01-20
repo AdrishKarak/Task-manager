@@ -3,7 +3,7 @@ import { UserContext } from '../../context/userContext';
 import Navbar from './Navbar';
 import SideMenu from './SideMenu';
 
-const DashboardLayout = ({ children, activeMenu }) => {
+const DashboardLayout = ({ children }) => {
     const { user } = useContext(UserContext);
     const [openSideMenu, setOpenSideMenu] = useState(false);
 
@@ -17,10 +17,7 @@ const DashboardLayout = ({ children, activeMenu }) => {
             {user && (
                 <div className="relative flex">
                     {/* SIDEBAR */}
-                    <SideMenu
-                        activeMenu={activeMenu}
-                        isOpen={openSideMenu}
-                    />
+                    <SideMenu isOpen={openSideMenu} />
 
                     {/* MAIN CONTENT */}
                     <div className="flex-1 mx-5">

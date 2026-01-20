@@ -1,8 +1,9 @@
 import React from 'react';
+import DashboardLayout from '../../Components/layouts/DashboardLayout';
 
 const ManageTasks = () => {
     return (
-        <div>ManageTasks</div>
+        <DashboardLayout activeMenu="Manage Tasks">Manage Tasks</DashboardLayout>
     );
 };
 

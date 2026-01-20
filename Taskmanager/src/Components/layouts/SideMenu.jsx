@@ -1,12 +1,13 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../context/userContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { SIDE_MENU_DATA, SIDE_MENU_USER_DATA } from '../../utils/data';
 
-const SideMenu = ({ activeMenu, isOpen }) => {
+const SideMenu = ({ isOpen }) => {
     const { user, clearUser } = useContext(UserContext);
     const [sideMenuData, setSideMenuData] = useState([]);
     const navigate = useNavigate();
+    const location = useLocation();   // <-- KEY FIX
 
     useEffect(() => {
         if (user) {
@@ -33,17 +34,15 @@ const SideMenu = ({ activeMenu, isOpen }) => {
     return (
         <div
             className={`
-    w-64 h-[calc(100vh-61px)] bg-white border-r border-gray-900 
-    shadow-[2px_0_8px_rgba(0,0,0,0.12)]
-    transition-transform duration-300
+      w-64 h-[calc(100vh-61px)] bg-white border-r border-gray-900 
+      shadow-[2px_0_8px_rgba(0,0,0,0.12)]
+      transition-transform duration-300
 
-    /* MOBILE: place sidebar BELOW navbar */
-    fixed top-[64px] left-0 z-40
-    ${isOpen ? "translate-x-0" : "-translate-x-full"}
+      fixed top-[64px] left-0 z-40
+      ${isOpen ? "translate-x-0" : "-translate-x-full"}
 
-    /* DESKTOP: normal layout */
-    lg:static lg:translate-x-0 lg:h-[calc(100vh-61px)]
-  `}
+      lg:static lg:translate-x-0 lg:h-[calc(100vh-61px)]
+    `}
         >
             <div className="flex flex-col items-center justify-center mb-7 pt-5">
                 <img
@@ -70,7 +69,7 @@ const SideMenu = ({ activeMenu, isOpen }) => {
                 <button
                     key={`menu_${index}`}
                     className={`w-full flex items-center gap-4 text-[15px]
-            ${activeMenu === item.label
+            ${location.pathname.startsWith(item.path)
                             ? 'text-blue-400 bg-linear-to-r from-blue-50/40 to-blue-100/50 border-r-3'
                             : ''
                         }
