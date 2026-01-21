@@ -36,3 +36,16 @@
 .card-btn {
     @apply flex items-center gap-2 font-medium text-stone-700 hover:text-blue-500 cursor-pointer bg-gray-100 hover:bg-blue-100 px-4 py-2 rounded-lg border border-gray-300/50;
 }
+
+.form-card {
+    @apply bg-white p-6 rounded-xl border border-slate-200 shadow-sm transition-shadow duration-200;
+}
+
+
+.form-input {
+    @apply w-full text-sm text-slate-800 bg-slate-50 border border-slate-200 px-3 py-2.5 rounded-md outline-none placeholder:text-slate-400 transition-all duration-200 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20;
+}
+
+.form-input:disabled {
+    @apply bg-slate-100 cursor-not-allowed text-slate-400;
+}
