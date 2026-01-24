@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import { UserContext } from '../../context/userContext';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { SIDE_MENU_DATA, SIDE_MENU_USER_DATA } from '../../utils/data';
+import defaultAvatar from "../../assets/panda.png";
 
 const SideMenu = ({ isOpen }) => {
     const { user, clearUser } = useContext(UserContext);
@@ -46,7 +47,7 @@ const SideMenu = ({ isOpen }) => {
         >
             <div className="flex flex-col items-center justify-center mb-7 pt-5">
                 <img
-                    src={user?.profileImageUrl || ''}
+                    src={user?.profileImageUrl || defaultAvatar}
                     alt="Profile"
                     className="w-20 h-20 rounded-full bg-slate-400"
                 />

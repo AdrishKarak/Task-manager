@@ -37,6 +37,10 @@
     @apply flex items-center gap-2 font-medium text-stone-700 hover:text-blue-500 cursor-pointer bg-gray-100 hover:bg-blue-100 px-4 py-2 rounded-lg border border-gray-300/50;
 }
 
+.card-btn-fill {
+    @apply flex items-center gap-3 text-[13px] font-medium text-white hover:text-primary bg-blue-400 hover:bg-blue-100 px-4 py-1.5 rounded-lg border border-blue-400 cursor-pointer;
+}
+
 .form-card {
     @apply bg-white p-6 rounded-xl border border-slate-200 shadow-sm transition-shadow duration-200;
 }
