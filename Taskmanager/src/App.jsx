@@ -13,6 +13,7 @@ import ViewTasksdetails from "./pages/User/ViewTasksdetails.jsx";
 import UserProvider, { UserContext } from './context/userContext.jsx';
 import { useContext } from 'react';
 import Snowfall from 'react-snowfall';
+import { Toaster } from 'react-hot-toast';
 
 const App = () => {
     return (
@@ -44,6 +45,14 @@ const App = () => {
                     </Routes>
                 </Router>
             </div>
+            <Toaster
+                toastOptions={{
+                    className: "",
+                    style: {
+                        fontSize: "14px",
+                    }
+                }}
+            />
         </UserProvider>
     );
 };

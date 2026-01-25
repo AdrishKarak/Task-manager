@@ -8,21 +8,22 @@ const DashboardLayout = ({ children }) => {
     const [openSideMenu, setOpenSideMenu] = useState(false);
 
     return (
-        <div>
+        <div className="min-h-screen bg-gray-50">
+            {/* TOP NAVBAR */}
             <Navbar
                 openSideMenu={openSideMenu}
                 setOpenSideMenu={setOpenSideMenu}
             />
 
             {user && (
-                <div className="relative flex">
+                <div className="flex">
                     {/* SIDEBAR */}
                     <SideMenu isOpen={openSideMenu} />
 
                     {/* MAIN CONTENT */}
-                    <div className="flex-1 mx-5">
+                    <main className="flex-1 px-5 pt-6 lg:ml-64">
                         {children}
-                    </div>
+                    </main>
                 </div>
             )}
         </div>
