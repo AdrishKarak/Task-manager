@@ -1,54 +1,76 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState, useEffect, useMemo, useCallback } from "react";
 import axiosInstance from "../utils/axiosinstance";
 import { API_PATHS } from "../utils/apiPaths";
-
 
 export const UserContext = createContext();
 
 const UserProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // New state to track loading
-    useEffect(() => {
-        if (user) return;
+    const [user, setUserState] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-        const accessToken = localStorage.getItem("token");
-        if (!accessToken) {
+    // 🔒 Fetch profile ONLY once
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (!token) {
             setLoading(false);
             return;
         }
 
+        let mounted = true;
+
         const fetchUser = async () => {
             try {
-                const response = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
-                setUser(response.data);
+                const res = await axiosInstance.get(API_PATHS.AUTH.GET_PROFILE);
 
+                if (mounted) {
+                    setUserState(prev => {
+                        // prevent re-render if same user
+                        if (JSON.stringify(prev) === JSON.stringify(res.data)) {
+                            return prev;
+                        }
+                        return res.data;
+                    });
+                }
             } catch (error) {
                 console.log("User not authenticated", error);
                 clearUser();
             } finally {
-                setLoading(false);
+                if (mounted) setLoading(false);
             }
-        }
+        };
+
         fetchUser();
 
+        return () => {
+            mounted = false;
+        };
     }, []);
 
-    const updateUser = (userData) => {
-        setUser(userData);
-        localStorage.setItem("accessToken", userData.token); //save token
+    // ✅ stable reference functions
+    const updateUser = useCallback((userData) => {
+        setUserState(userData);
+        localStorage.setItem("accessToken", userData.token);
         setLoading(false);
-    };
+    }, []);
 
-    const clearUser = () => {
-        setUser(null);
+    const clearUser = useCallback(() => {
+        setUserState(null);
         localStorage.removeItem("accessToken");
-    };
+    }, []);
+
+    // 🔥 MOST IMPORTANT FIX
+    const value = useMemo(() => ({
+        user,
+        loading,
+        updateUser,
+        clearUser
+    }), [user, loading, updateUser, clearUser]);
 
     return (
-        <UserContext.Provider value={{ user, loading, updateUser, clearUser }}>
+        <UserContext.Provider value={value}>
             {children}
         </UserContext.Provider>
-    )
+    );
 };
 
 export default UserProvider;

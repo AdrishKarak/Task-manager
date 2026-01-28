@@ -6,6 +6,48 @@ import { API_PATHS } from '../../utils/apiPaths';
 import { LuFileSpreadsheet } from 'react-icons/lu';
 import TaskStatusTabs from '../../Components/TaskStatusTabs';
 import TaskCard from '../../Components/Cards/TaskCard';
+import toast from 'react-hot-toast';
+
+const TaskCardSkeleton = () => {
+    return (
+        <div className='bg-white rounded-xl py-4 shadow-md shadow-gray-200 border border-gray-200/50 animate-pulse'>
+            <div className='flex items-center gap-2 px-4'>
+                <div className='h-6 w-20 bg-gray-200 rounded-md'></div>
+                <div className='h-6 w-24 bg-gray-200 rounded-md'></div>
+            </div>
+
+            <div className='px-4 mt-3 border-l-[3px] border-gray-300'>
+                <div className='h-4 bg-gray-200 rounded w-3/4 mt-2'></div>
+                <div className='h-3 bg-gray-200 rounded w-full mt-3'></div>
+                <div className='h-3 bg-gray-200 rounded w-2/3 mt-2'></div>
+                <div className='h-3 bg-gray-200 rounded w-1/2 mt-3 mb-2'></div>
+                <div className='w-full bg-gray-200 rounded-full h-2'></div>
+            </div>
+
+            <div className='px-4 mt-4'>
+                <div className='flex items-center justify-between mb-3'>
+                    <div>
+                        <div className='h-3 bg-gray-200 rounded w-16 mb-1'></div>
+                        <div className='h-4 bg-gray-200 rounded w-20 mt-1'></div>
+                    </div>
+                    <div>
+                        <div className='h-3 bg-gray-200 rounded w-16 mb-1'></div>
+                        <div className='h-4 bg-gray-200 rounded w-20 mt-1'></div>
+                    </div>
+                </div>
+
+                <div className='flex items-center justify-between pt-3 border-t border-gray-100'>
+                    <div className='flex items-center -space-x-2'>
+                        <div className='h-8 w-8 rounded-full bg-gray-200'></div>
+                        <div className='h-8 w-8 rounded-full bg-gray-200'></div>
+                        <div className='h-8 w-8 rounded-full bg-gray-200'></div>
+                    </div>
+                    <div className='h-7 w-12 bg-gray-200 rounded-lg'></div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const ManageTasks = () => {
     const [allTasks, setAllTasks] = useState([]);
@@ -47,10 +89,22 @@ const ManageTasks = () => {
 
     const handleDownloadReport = async () => {
         try {
-            // TODO: Implement download report functionality
-            console.log("Download report functionality to be implemented");
+            const response = await axiosInstance.get(API_PATHS.REPORTS.EXPORT_TASKS, {
+                responseType: 'blob',
+            })
+
+            //Create a Url for the blob
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', 'task_details.xlsx');
+            document.body.appendChild(link);
+            link.click();
+            link.parentNode.removeChild(link);
+            window.URL.revokeObjectURL(url);
         } catch (error) {
             console.log("Error downloading report", error);
+            toast.error("Error downloading report. Please try again later");
         }
     };
 
@@ -93,8 +147,10 @@ const ManageTasks = () => {
                 </div>
 
                 {isLoading ? (
-                    <div className='flex items-center justify-center py-20'>
-                        <div className='text-gray-500'>Loading tasks...</div>
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6'>
+                        {[...Array(6)].map((_, index) => (
+                            <TaskCardSkeleton key={index} />
+                        ))}
                     </div>
                 ) : allTasks.length === 0 ? (
                     <div className='flex flex-col items-center justify-center py-20'>

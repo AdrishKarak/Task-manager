@@ -8,10 +8,15 @@ const excelJS = require("exceljs");
 
 const exportTasksReport = async (req, res) => {
   try {
+    const tasks = await Task.find()
+      .populate("assignedTo", "name email")
+      .lean();
 
-    const tasks = await Task.find().populate("assignedTo", "name email");
+    if (!tasks.length) {
+      return res.status(404).json({ message: "No tasks found" });
+    }
 
-    const workbook = new excelJS.workbook();
+    const workbook = new excelJS.Workbook();   // ✅ FIXED
     const worksheet = workbook.addWorksheet("Tasks Report");
 
     worksheet.columns = [
@@ -20,23 +25,25 @@ const exportTasksReport = async (req, res) => {
       { header: "Description", key: "description", width: 50 },
       { header: "Priority", key: "priority", width: 15 },
       { header: "Status", key: "status", width: 20 },
-      { header: "Due Date", key: "duedate", width: 20 },
+      { header: "Due Date", key: "dueDate", width: 20 },
       { header: "Assigned To", key: "assignedTo", width: 30 },
     ];
 
     tasks.forEach((task) => {
-      const assignedTo = task.assignedTo
-        ?.map((user) => `${user.name} (${user.email})`)
-        .join(", ");
+      const assignedTo = task.assignedTo?.length
+        ? task.assignedTo.map(u => `${u.name} (${u.email})`).join(", ")
+        : "Unassigned";
 
       worksheet.addRow({
-        _id: task._id,
-        title: task.title,
-        description: task.description,
-        priority: task.priority,
-        status: task.status,
-        dueDate: task.dueDate.toISOString().split("T")[0],
-        assignedTo: assignedTo || "Unassigned",
+        _id: task._id.toString(),
+        title: task.title || "",
+        description: task.description || "",
+        priority: task.priority || "",
+        status: task.status || "",
+        dueDate: task.dueDate
+          ? new Date(task.dueDate).toISOString().split("T")[0]
+          : "No due date", // ✅ SAFE
+        assignedTo,
       });
     });
 
@@ -44,21 +51,20 @@ const exportTasksReport = async (req, res) => {
       "Content-Type",
       "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     );
-
     res.setHeader(
       "Content-Disposition",
       'attachment; filename="tasks-report.xlsx"'
     );
 
-    return workbook.xlsx.write(res).then(() => {
-      res.end();
-    });
-
+    await workbook.xlsx.write(res);
+    res.end();
 
   } catch (error) {
-    res.status(500).json({ message: "Error exploring taskss", error: error.message });
+    console.error("EXPORT TASKS ERROR:", error);
+    res.status(500).json({ message: "Report generation failed", error: error.message });
   }
 };
+
 
 //@desc Export user-task report as an excel file
 //@route GET /api/reports/export/users

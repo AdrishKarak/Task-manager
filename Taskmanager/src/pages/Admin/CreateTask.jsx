@@ -10,6 +10,69 @@ import AddAttachments from "../../Components/Inputs/AddAttachments";
 import axiosInstance from "../../utils/axiosinstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import toast from "react-hot-toast";
+import moment from "moment";
+
+// Skeleton Loading Component
+const TaskFormSkeleton = () => {
+    return (
+        <div className="form-card col-span-3 bg-white rounded-xl border border-slate-200 shadow-sm animate-pulse">
+            {/* Header Skeleton */}
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+                <div className="h-6 bg-slate-200 rounded w-32"></div>
+            </div>
+
+            {/* Body Skeleton */}
+            <div className="p-6 space-y-4">
+                {/* Title Skeleton */}
+                <div className="space-y-2">
+                    <div className="h-4 bg-slate-200 rounded w-24"></div>
+                    <div className="h-10 bg-slate-200 rounded"></div>
+                </div>
+
+                {/* Description Skeleton */}
+                <div className="space-y-2">
+                    <div className="h-4 bg-slate-200 rounded w-32"></div>
+                    <div className="h-24 bg-slate-200 rounded"></div>
+                </div>
+
+                {/* Priority & Due Date Skeleton */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <div className="h-4 bg-slate-200 rounded w-20"></div>
+                        <div className="h-10 bg-slate-200 rounded"></div>
+                    </div>
+                    <div className="space-y-2">
+                        <div className="h-4 bg-slate-200 rounded w-24"></div>
+                        <div className="h-10 bg-slate-200 rounded"></div>
+                    </div>
+                </div>
+
+                {/* Assigned Users Skeleton */}
+                <div className="space-y-2">
+                    <div className="h-4 bg-slate-200 rounded w-28"></div>
+                    <div className="h-10 bg-slate-200 rounded"></div>
+                </div>
+
+                {/* TODO Checklist Skeleton */}
+                <div className="space-y-2">
+                    <div className="h-4 bg-slate-200 rounded w-32"></div>
+                    <div className="h-20 bg-slate-200 rounded"></div>
+                </div>
+
+                {/* Attachments Skeleton */}
+                <div className="space-y-2">
+                    <div className="h-4 bg-slate-200 rounded w-36"></div>
+                    <div className="h-16 bg-slate-200 rounded"></div>
+                </div>
+
+                {/* Button Skeleton */}
+                <div className="flex justify-end gap-3 mt-7">
+                    <div className="h-10 bg-slate-200 rounded w-32"></div>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const CreateTask = () => {
     const location = useLocation();
@@ -27,9 +90,11 @@ const CreateTask = () => {
     });
 
     const [loading, setLoading] = useState(false);
+    const [pageLoading, setPageLoading] = useState(false); // For initial page load
     const [errors, setErrors] = useState({});
     const [openDeleteAlert, setOpenDeleteAlert] = useState(false);
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+    const [currentTask, setCurrentTask] = useState(null);
 
     // Load draft from localStorage on mount
     useEffect(() => {
@@ -163,7 +228,7 @@ const CreateTask = () => {
             }));
 
             const response = await axiosInstance.put(
-                `${API_PATHS.TASKS.UPDATE_TASK}/${taskId}`,
+                API_PATHS.TASKS.UPDATE_TASK(taskId),
                 {
                     ...taskData,
                     dueDate: new Date(taskData.dueDate).toISOString(),
@@ -184,7 +249,7 @@ const CreateTask = () => {
         try {
             setLoading(true);
 
-            await axiosInstance.delete(`${API_PATHS.TASKS.DELETE_TASK}/${taskId}`);
+            await axiosInstance.delete(API_PATHS.TASKS.DELETE_TASK(taskId));
 
             toast.success("Task deleted successfully! 🗑️");
             navigate("/admin/dashboard");
@@ -218,6 +283,42 @@ const CreateTask = () => {
         }
     };
 
+    //get Task info by id
+    const getTaskDetailsById = async () => {
+        try {
+            setPageLoading(true); // Show skeleton while loading
+
+            const response = await axiosInstance.get(API_PATHS.TASKS.GET_TASK_BY_ID(taskId));
+
+            if (response.data) {
+                const taskInfo = response.data;
+                setCurrentTask(taskInfo);
+
+                setTaskData((prevState) => ({
+                    title: taskInfo.title,
+                    description: taskInfo.description,
+                    priority: taskInfo.priority,
+                    dueDate: taskInfo.dueDate ? moment(taskInfo.dueDate).format("YYYY-MM-DD") : null,
+                    assignedTo: taskInfo?.assignedTo?.map((item) => item?._id) || [],
+                    todoCheckList: taskInfo?.todoCheckList?.map((item) => item?.text) || [],
+                    attachments: taskInfo?.attachments || []
+                }));
+            }
+        } catch (error) {
+            console.error("Get task details error:", error);
+            toast.error("Failed to get task details.");
+        } finally {
+            setPageLoading(false); // Hide skeleton after loading
+        }
+    }
+
+    useEffect(() => {
+        if (taskId) {
+            getTaskDetailsById(taskId);
+        }
+        return () => { };
+    }, [taskId]);
+
     // Check if form is valid for submit button
     const isFormValid = taskData.title.trim() &&
         taskData.description.trim() &&
@@ -230,191 +331,196 @@ const CreateTask = () => {
         <DashboardLayout activeMenu="Create Task">
             <div className="mt-0">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                    <div className="form-card col-span-3 bg-white rounded-xl border border-slate-200 shadow-sm">
+                    {/* Show Skeleton while loading task details */}
+                    {pageLoading ? (
+                        <TaskFormSkeleton />
+                    ) : (
+                        <div className="form-card col-span-3 bg-white rounded-xl border border-slate-200 shadow-sm">
 
-                        {/* Header */}
-                        <div className="flex items-center justify-between px-6 py-4 border-b">
-                            <h2 className="text-base md:text-lg font-semibold text-slate-800">
-                                {taskId ? "Update Task" : "Create Task"}
-                            </h2>
+                            {/* Header */}
+                            <div className="flex items-center justify-between px-6 py-4 border-b">
+                                <h2 className="text-base md:text-lg font-semibold text-slate-800">
+                                    {taskId ? "Update Task" : "Create Task"}
+                                </h2>
 
-                            {taskId && (
-                                <button
-                                    type="button"
-                                    onClick={() => setOpenDeleteAlert(true)}
-                                    className="flex items-center gap-1.5 text-sm font-medium text-rose-500 bg-rose-100 rounded px-2 py-1 border border-rose-200 hover:bg-rose-200 transition-colors"
-                                >
-                                    <LuTrash2 className="text-base" />
-                                    Delete
-                                </button>
-                            )}
-                        </div>
-
-                        {/* Body */}
-                        <div className="p-6 space-y-4">
-
-                            {/* Title */}
-                            <div className="space-y-1">
-                                <label className="text-sm font-medium text-slate-600">
-                                    Task Title <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    className={`form-input ${errors.title ? 'border-red-500' : ''
-                                        }`}
-                                    placeholder="Create APP UI/UX etc."
-                                    value={taskData.title}
-                                    onChange={(e) =>
-                                        handleValueChange("title", e.target.value)
-                                    }
-                                    maxLength={100}
-                                />
-                                {errors.title && (
-                                    <p className="text-xs text-red-500 mt-1">{errors.title}</p>
-                                )}
-                                <p className="text-xs text-slate-400">{taskData.title.length}/100</p>
-                            </div>
-
-                            {/* Description */}
-                            <div className="space-y-1">
-                                <label className="text-sm font-medium text-slate-600">
-                                    Task Description <span className="text-red-500">*</span>
-                                </label>
-                                <textarea
-                                    className={`form-input resize-none ${errors.description ? 'border-red-500' : ''
-                                        }`}
-                                    rows={4}
-                                    placeholder="Task Description"
-                                    value={taskData.description}
-                                    onChange={(e) =>
-                                        handleValueChange("description", e.target.value)
-                                    }
-                                    maxLength={500}
-                                />
-                                {errors.description && (
-                                    <p className="text-xs text-red-500 mt-1">{errors.description}</p>
-                                )}
-                                <p className="text-xs text-slate-400">{taskData.description.length}/500</p>
-                            </div>
-
-                            {/* Priority & Due Date */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-600">
-                                        Priority <span className="text-red-500">*</span>
-                                    </label>
-                                    <SelectDropdown
-                                        options={PRIORITY_DATA}
-                                        value={taskData.priority}
-                                        onChange={(value) =>
-                                            handleValueChange("priority", value)
-                                        }
-                                        placeholder="Select Priority"
-                                    />
-                                    {errors.priority && (
-                                        <p className="text-xs text-red-500 mt-1">{errors.priority}</p>
-                                    )}
-                                </div>
-
-                                <div className="space-y-1">
-                                    <label className="text-sm font-medium text-slate-600">
-                                        Due Date <span className="text-red-500">*</span>
-                                    </label>
-                                    <input
-                                        type="date"
-                                        className={`form-input ${errors.dueDate ? 'border-red-500' : ''
-                                            }`}
-                                        value={taskData.dueDate}
-                                        onChange={(e) =>
-                                            handleValueChange("dueDate", e.target.value)
-                                        }
-                                        min={new Date().toISOString().split('T')[0]}
-                                    />
-                                    {errors.dueDate && (
-                                        <p className="text-xs text-red-500 mt-1">{errors.dueDate}</p>
-                                    )}
-                                </div>
-                            </div>
-
-                            {/* Assigned Users */}
-                            <div className="space-y-1">
-                                <label className="text-sm font-medium text-slate-600">
-                                    Assigned To <span className="text-red-500">*</span>
-                                </label>
-                                <SelectUsers
-                                    selectedUsers={taskData.assignedTo}
-                                    setSelectedUsers={(value) =>
-                                        handleValueChange("assignedTo", value)
-                                    }
-                                />
-                                {errors.assignedTo && (
-                                    <p className="text-xs text-red-500 mt-1">{errors.assignedTo}</p>
-                                )}
-                            </div>
-
-                            {/* TODO Checklist */}
-                            <div className="space-y-1">
-                                <label className="text-sm font-medium text-slate-600">
-                                    TODO Checklist <span className="text-red-500">*</span>
-                                </label>
-                                <TodoListInput
-                                    todoList={taskData.todoCheckList}
-                                    setTodoList={(value) =>
-                                        handleValueChange("todoCheckList", value)
-                                    }
-                                />
-                                {errors.todoCheckList && (
-                                    <p className="text-xs text-red-500 mt-1">{errors.todoCheckList}</p>
-                                )}
-                            </div>
-
-                            {/* Attachments */}
-                            <div className="mt-3">
-                                <label className="text-sm font-medium text-slate-600">
-                                    Add Attachments
-                                </label>
-                                <AddAttachments
-                                    attachments={taskData.attachments}
-                                    setAttachments={(value) =>
-                                        handleValueChange("attachments", value)
-                                    }
-                                />
-                            </div>
-
-                            {/* Submit */}
-                            <div className="flex justify-end gap-3 mt-7">
-                                {!taskId && hasUnsavedChanges && (
+                                {taskId && (
                                     <button
                                         type="button"
-                                        className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
-                                        onClick={clearData}
+                                        onClick={() => setOpenDeleteAlert(true)}
+                                        className="flex items-center gap-1.5 text-sm font-medium text-rose-500 bg-rose-100 rounded px-2 py-1 border border-rose-200 hover:bg-rose-200 transition-colors"
                                     >
-                                        Clear Draft
+                                        <LuTrash2 className="text-base" />
+                                        Delete
                                     </button>
                                 )}
-                                <button
-                                    className={`px-6 py-2 text-sm font-medium text-white rounded-lg transition-all ${loading || !isFormValid
-                                            ? 'bg-slate-400 cursor-not-allowed'
-                                            : 'bg-blue-400 hover:bg-blue-500'
-                                        }`}
-                                    onClick={handleSubmit}
-                                    disabled={loading || !isFormValid}
-                                >
-                                    {loading ? (
-                                        <span className="flex items-center gap-2">
-                                            <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                                            </svg>
-                                            PLEASE WAIT...
-                                        </span>
-                                    ) : (
-                                        taskId ? "UPDATE TASK" : "CREATE TASK"
-                                    )}
-                                </button>
                             </div>
 
+                            {/* Body */}
+                            <div className="p-6 space-y-4">
+
+                                {/* Title */}
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-slate-600">
+                                        Task Title <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        className={`form-input ${errors.title ? 'border-red-500' : ''
+                                            }`}
+                                        placeholder="Create APP UI/UX etc."
+                                        value={taskData.title}
+                                        onChange={(e) =>
+                                            handleValueChange("title", e.target.value)
+                                        }
+                                        maxLength={100}
+                                    />
+                                    {errors.title && (
+                                        <p className="text-xs text-red-500 mt-1">{errors.title}</p>
+                                    )}
+                                    <p className="text-xs text-slate-400">{taskData.title.length}/100</p>
+                                </div>
+
+                                {/* Description */}
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-slate-600">
+                                        Task Description <span className="text-red-500">*</span>
+                                    </label>
+                                    <textarea
+                                        className={`form-input resize-none ${errors.description ? 'border-red-500' : ''
+                                            }`}
+                                        rows={4}
+                                        placeholder="Task Description"
+                                        value={taskData.description}
+                                        onChange={(e) =>
+                                            handleValueChange("description", e.target.value)
+                                        }
+                                        maxLength={500}
+                                    />
+                                    {errors.description && (
+                                        <p className="text-xs text-red-500 mt-1">{errors.description}</p>
+                                    )}
+                                    <p className="text-xs text-slate-400">{taskData.description.length}/500</p>
+                                </div>
+
+                                {/* Priority & Due Date */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-medium text-slate-600">
+                                            Priority <span className="text-red-500">*</span>
+                                        </label>
+                                        <SelectDropdown
+                                            options={PRIORITY_DATA}
+                                            value={taskData.priority}
+                                            onChange={(value) =>
+                                                handleValueChange("priority", value)
+                                            }
+                                            placeholder="Select Priority"
+                                        />
+                                        {errors.priority && (
+                                            <p className="text-xs text-red-500 mt-1">{errors.priority}</p>
+                                        )}
+                                    </div>
+
+                                    <div className="space-y-1">
+                                        <label className="text-sm font-medium text-slate-600">
+                                            Due Date <span className="text-red-500">*</span>
+                                        </label>
+                                        <input
+                                            type="date"
+                                            className={`form-input ${errors.dueDate ? 'border-red-500' : ''
+                                                }`}
+                                            value={taskData.dueDate}
+                                            onChange={(e) =>
+                                                handleValueChange("dueDate", e.target.value)
+                                            }
+                                            min={new Date().toISOString().split('T')[0]}
+                                        />
+                                        {errors.dueDate && (
+                                            <p className="text-xs text-red-500 mt-1">{errors.dueDate}</p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Assigned Users */}
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-slate-600">
+                                        Assigned To <span className="text-red-500">*</span>
+                                    </label>
+                                    <SelectUsers
+                                        selectedUsers={taskData.assignedTo}
+                                        setSelectedUsers={(value) =>
+                                            handleValueChange("assignedTo", value)
+                                        }
+                                    />
+                                    {errors.assignedTo && (
+                                        <p className="text-xs text-red-500 mt-1">{errors.assignedTo}</p>
+                                    )}
+                                </div>
+
+                                {/* TODO Checklist */}
+                                <div className="space-y-1">
+                                    <label className="text-sm font-medium text-slate-600">
+                                        TODO Checklist <span className="text-red-500">*</span>
+                                    </label>
+                                    <TodoListInput
+                                        todoList={taskData.todoCheckList}
+                                        setTodoList={(value) =>
+                                            handleValueChange("todoCheckList", value)
+                                        }
+                                    />
+                                    {errors.todoCheckList && (
+                                        <p className="text-xs text-red-500 mt-1">{errors.todoCheckList}</p>
+                                    )}
+                                </div>
+
+                                {/* Attachments */}
+                                <div className="mt-3">
+                                    <label className="text-sm font-medium text-slate-600">
+                                        Add Attachments
+                                    </label>
+                                    <AddAttachments
+                                        attachments={taskData.attachments}
+                                        setAttachments={(value) =>
+                                            handleValueChange("attachments", value)
+                                        }
+                                    />
+                                </div>
+
+                                {/* Submit */}
+                                <div className="flex justify-end gap-3 mt-7">
+                                    {!taskId && hasUnsavedChanges && (
+                                        <button
+                                            type="button"
+                                            className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors"
+                                            onClick={clearData}
+                                        >
+                                            Clear Draft
+                                        </button>
+                                    )}
+                                    <button
+                                        className={`px-6 py-2 text-sm font-medium text-white rounded-lg transition-all ${loading || !isFormValid
+                                            ? 'bg-slate-400 cursor-not-allowed'
+                                            : 'bg-blue-400 hover:bg-blue-500'
+                                            }`}
+                                        onClick={handleSubmit}
+                                        disabled={loading || !isFormValid}
+                                    >
+                                        {loading ? (
+                                            <span className="flex items-center gap-2">
+                                                <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
+                                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                                </svg>
+                                                PLEASE WAIT...
+                                            </span>
+                                        ) : (
+                                            taskId ? "UPDATE TASK" : "CREATE TASK"
+                                        )}
+                                    </button>
+                                </div>
+
+                            </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             </div>
 

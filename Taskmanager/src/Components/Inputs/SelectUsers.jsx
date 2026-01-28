@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { API_PATHS } from "../../utils/apiPaths";
 import axiosInstance from "../../utils/axiosinstance";
 import { LuUsers } from "react-icons/lu";
@@ -11,16 +11,34 @@ const SelectUsers = ({ selectedUsers, setSelectedUsers }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tempSelectedUsers, setTempSelectedUsers] = useState([]);
 
-    const getAllUsers = async () => {
-        try {
-            const response = await axiosInstance.get(API_PATHS.USERS.GET_ALL_USERS);
-            if (Array.isArray(response.data)) {
-                setAllUsers(response.data);
+    // 🔹 Fetch users ONLY once
+    useEffect(() => {
+        let mounted = true;
+
+        const fetchUsers = async () => {
+            try {
+                const response = await axiosInstance.get(API_PATHS.USERS.GET_ALL_USERS);
+                if (mounted && Array.isArray(response.data)) {
+                    setAllUsers(response.data);
+                }
+            } catch (error) {
+                console.error("Error fetching users", error);
             }
-        } catch (error) {
-            console.error("Error fetching users", error);
+        };
+
+        fetchUsers();
+
+        return () => {
+            mounted = false;
+        };
+    }, []);
+
+    // 🔹 Reset temp selection if parent clears users
+    useEffect(() => {
+        if (selectedUsers.length === 0) {
+            setTempSelectedUsers([]);
         }
-    };
+    }, [selectedUsers]);
 
     const toggleUserSelection = (userId) => {
         setTempSelectedUsers((prev) =>
@@ -35,28 +53,16 @@ const SelectUsers = ({ selectedUsers, setSelectedUsers }) => {
         setIsModalOpen(false);
     };
 
-    /**
-     * IMPORTANT:
-     * Always return one avatar per selected user.
-     * Missing images fall back to defaultAvatar.
-     */
-    const selectedUserAvatars = allUsers
-        .filter((user) => selectedUsers.includes(user._id))
-        .map((user) => user.profileImageUrl || defaultAvatar);
-
-    useEffect(() => {
-        getAllUsers();
-    }, []);
-
-    useEffect(() => {
-        if (selectedUsers.length === 0) {
-            setTempSelectedUsers([]);
-        }
-    }, [selectedUsers]);
+    // 🔹 Memoized avatar list (prevents recalculation on every render)
+    const selectedUserAvatars = useMemo(() => {
+        return allUsers
+            .filter((user) => selectedUsers.includes(user._id))
+            .map((user) => user.profileImageUrl || defaultAvatar);
+    }, [allUsers, selectedUsers]);
 
     return (
         <div className="space-y-4 mt-2">
-            {selectedUserAvatars.length === 0 && (
+            {selectedUserAvatars.length === 0 ? (
                 <button
                     className="card-btn"
                     onClick={() => setIsModalOpen(true)}
@@ -64,9 +70,7 @@ const SelectUsers = ({ selectedUsers, setSelectedUsers }) => {
                     <LuUsers className="text-sm" />
                     Add Members
                 </button>
-            )}
-
-            {selectedUserAvatars.length > 0 && (
+            ) : (
                 <div
                     className="cursor-pointer"
                     onClick={() => setIsModalOpen(true)}
