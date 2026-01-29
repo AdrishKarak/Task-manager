@@ -1,13 +1,167 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useUserAuth } from '../../hooks/useUserAuth';
 import DashboardLayout from '../../Components/layouts/DashboardLayout';
 import { UserContext } from '../../context/userContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import axiosInstance from '../../utils/axiosinstance';
+import { API_PATHS } from '../../utils/apiPaths';
+import moment from 'moment';
+import { addThousandSeparator } from '../../utils/helper';
+import InfoCard from '../../Components/Cards/InfoCard';
+import { LuArrowRight } from 'react-icons/lu';
+import TaskListTable from '../../Components/TaskListTable';
+import CustomPieChart from '../../Components/Charts/CustomPieChart';
+import CustomBarChart from '../../Components/Charts/CustomBarChart';
+
+const COLORS = ["#8D51FF", "#00BBDB", "#7BCE00"]
 
 const Dashboard = () => {
     useUserAuth();
     const { user } = useContext(UserContext);
+    const navigate = useNavigate();
+    const location = useLocation();
+
+
+    const [dashboardData, setDashboardData] = useState(null);
+    const [pieChartData, setPieChartData] = useState([]);
+    const [barChartData, setBarChartData] = useState([]);
+
+    //Prepare chart data
+    const prepareChartData = (data) => {
+        const taskDistribution = data?.taskDistribution || null;
+        const taskPriorityLevels = data?.taskPriorityLevels || null;
+
+        const taskDistributionData = [
+            { status: 'Pending', count: taskDistribution?.Pending || 0 },
+            { status: 'In Progress', count: taskDistribution?.InProgress || 0 },
+            { status: 'Completed', count: taskDistribution?.Completed || 0 },
+        ];
+
+        const taskPriorityData = [
+            { priority: 'Low', count: taskPriorityLevels?.Low || 0 },
+            { priority: 'Medium', count: taskPriorityLevels?.Medium || 0 },
+            { priority: 'High', count: taskPriorityLevels?.High || 0 },
+        ];
+
+        setPieChartData(taskDistributionData);
+        setBarChartData(taskPriorityData);
+    }
+
+    const getDashboardData = async () => {
+        try {
+            const response = await axiosInstance.get(API_PATHS.TASKS.GET_USER_DASHBOARD_DATA);
+            if (response.data) {
+                setDashboardData(response.data);
+                prepareChartData(response.data?.charts);
+            }
+        } catch (error) {
+            console.log("Error fetching dashboard data", error);
+        }
+    }
+
+    const onSeeMore = () => {
+        navigate('/user/my-tasks');
+    }
+
+    useEffect(() => {
+        getDashboardData();
+    }, [location.pathname]); // Refetch whenever we navigate to this page
+
+    useEffect(() => {
+        // Also refetch when page becomes visible again (for browser tab switches)
+        const handleVisibilityChange = () => {
+            if (!document.hidden) {
+                console.log("Dashboard visible - refetching data");
+                getDashboardData();
+            }
+        };
+
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+        };
+    }, [])
+
     return (
         <DashboardLayout activeMenu="Dashboard">
+            <div className='card my-5'>
+                <div>
+                    <div className='col-span-3'>
+                        <h2 className='text-xl md:text-2xl font-medium mt-2.5'> Hello! {user?.name}</h2>
+                        <p className='text-xs md:text-[13px] text-gray-400 mt-1.5'>
+                            {moment().format("dddd Do MMMM YYYY")}
+                        </p>
+                    </div>
+                </div>
+                <div className='grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mt-5'>
+                    <InfoCard
+                        label="Total tasks"
+                        value={addThousandSeparator(dashboardData?.charts?.taskDistribution?.All || 0)}
+                        color="bg-blue-600"
+                    />
+
+                    <InfoCard
+                        label="Pending tasks"
+                        value={addThousandSeparator(dashboardData?.charts?.taskDistribution?.Pending || 0)}
+                        color="bg-violet-500"
+                    />
+
+                    <InfoCard
+                        label="In Progress tasks"
+                        value={addThousandSeparator(dashboardData?.charts?.taskDistribution?.InProgress || 0)}
+                        color="bg-cyan-400"
+                    />
+
+                    <InfoCard
+                        label="Completed tasks"
+                        value={addThousandSeparator(dashboardData?.charts?.taskDistribution?.Completed || 0)}
+                        color="bg-green-500"
+                    />
+                </div>
+            </div>
+
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6 my-4 md:my-6'>
+
+                <div>
+                    <div className='card'>
+                        <div className='flex items-center justify-between'>
+                            <h5 className='font-medium'>Task distribution</h5>
+                        </div>
+
+                        <CustomPieChart
+                            data={pieChartData}
+                            colors={COLORS}
+                        />
+                    </div>
+                </div>
+
+
+                <div>
+                    <div className='card'>
+                        <div className='flex items-center justify-between'>
+                            <h5 className='font-medium'>Task distribution</h5>
+                        </div>
+
+                        <CustomBarChart
+                            data={barChartData}
+                        />
+                    </div>
+                </div>
+
+                <div className='md:col-span-2'>
+                    <div className='card'>
+                        <div className='flex items-center justify-between'>
+                            <h5 className='text-lg'>Recent Tasks</h5>
+                            <button className='card-btn' onClick={onSeeMore}>See All
+                                <LuArrowRight className='text-base' />
+                            </button>
+                        </div>
+                        <TaskListTable tableData={dashboardData?.recentTasks || []} />
+                    </div>
+                </div>
+            </div>
+
         </DashboardLayout>
     );
 };

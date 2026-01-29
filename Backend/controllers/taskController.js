@@ -24,10 +24,15 @@ const getTasks = async (req, res) => {
         //Add completed todochecklist count to each task
         tasks = await Promise.all(
             tasks.map(async (task) => {
+                const totalTodoCount = task.todoCheckList.length;
                 const completedCount = task.todoCheckList.filter(
                     (item) => item.completed
                 ).length;
-                return { ...task._doc, completedTodoCount: completedCount };
+                return {
+                    ...task._doc,
+                    completedTodoCount: completedCount,
+                    totalTodoCount: totalTodoCount
+                };
             })
         );
 
@@ -228,9 +233,14 @@ const updateTaskChecklist = async (req, res) => {
             return res.status(403).json({ message: "Not authorized to update checklist" });
         }
 
-        task.todoCheckList = todoCheckList // replace with updated checklist
+        task.todoCheckList = todoCheckList; // replace with updated checklist
 
-        //Auto-mark task as completed if all items are cleared
+        // Calculate progress based on completed items
+        const totalItems = task.todoCheckList.length;
+        const completedItems = task.todoCheckList.filter(item => item.completed).length;
+        task.progress = totalItems > 0 ? Math.round((completedItems / totalItems) * 100) : 0;
+
+        // Auto-update task status based on progress
         if (task.progress === 100) {
             task.status = "Completed";
         } else if (task.progress > 0) {
