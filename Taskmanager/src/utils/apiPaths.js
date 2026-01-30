@@ -1,4 +1,4 @@
-export const BASE_URL = "https://task-manager-backend-qo56.onrender.com";
+export const BASE_URL = "https://tms-backend-k0p5.onrender.com";
 
 export const API_PATHS = {
 
