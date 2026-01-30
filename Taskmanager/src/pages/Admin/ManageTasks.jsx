@@ -114,29 +114,29 @@ const ManageTasks = () => {
 
     return (
         <DashboardLayout activeMenu="Manage Tasks">
-            <div className='my-5'>
-                <div className='flex flex-col lg:flex-row lg:items-center justify-between gap-4'>
-                    <div className='flex items-center justify-between gap-3'>
-                        <h2 className='text-xl md:text-2xl font-semibold text-gray-800'>
+            <div className='my-5 w-full max-w-full overflow-x-hidden'>
+                <div className='flex flex-col lg:flex-row lg:items-center justify-between gap-4 w-full'>
+                    <div className='flex items-center justify-between gap-3 min-w-0'>
+                        <h2 className='text-xl md:text-2xl font-semibold text-gray-800 truncate'>
                             My Tasks
                         </h2>
                         <button
-                            className='flex lg:hidden download-btn items-center gap-2'
+                            className='flex lg:hidden download-btn items-center gap-2 flex-shrink-0'
                             onClick={handleDownloadReport}
                         >
                             <LuFileSpreadsheet className='text-lg' />
-                            <span className='hidden sm:inline'>Download Report</span>
+                            <span className='hidden sm:inline whitespace-nowrap'>Download Report</span>
                         </button>
                     </div>
                     {tabs.length > 0 && tabs[0]?.count > 0 && (
-                        <div className='flex items-center gap-3'>
+                        <div className='flex items-center gap-3 w-full lg:w-auto overflow-x-auto'>
                             <TaskStatusTabs
                                 tabs={tabs}
                                 activeTab={filterStatus}
                                 setActiveTab={setFilterStatus}
                             />
                             <button
-                                className='download-btn hidden lg:flex items-center gap-2'
+                                className='download-btn hidden lg:flex items-center gap-2 flex-shrink-0 whitespace-nowrap'
                                 onClick={handleDownloadReport}
                             >
                                 <LuFileSpreadsheet className='text-lg' />
@@ -147,22 +147,22 @@ const ManageTasks = () => {
                 </div>
 
                 {isLoading ? (
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 w-full'>
                         {[...Array(6)].map((_, index) => (
                             <TaskCardSkeleton key={index} />
                         ))}
                     </div>
                 ) : allTasks.length === 0 ? (
-                    <div className='flex flex-col items-center justify-center py-20'>
+                    <div className='flex flex-col items-center justify-center py-20 w-full'>
                         <div className='text-gray-400 text-lg mb-2'>No tasks found</div>
-                        <p className='text-gray-500 text-sm'>
+                        <p className='text-gray-500 text-sm text-center px-4'>
                             {filterStatus !== 'All'
                                 ? `No ${filterStatus.toLowerCase()} tasks available`
                                 : 'Create your first task to get started'}
                         </p>
                     </div>
                 ) : (
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 w-full'>
                         {allTasks.map((item) => (
                             <TaskCard
                                 key={item._id}

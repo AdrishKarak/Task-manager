@@ -8,7 +8,7 @@ const DashboardLayout = ({ children }) => {
     const [openSideMenu, setOpenSideMenu] = useState(false);
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-gray-50 overflow-x-hidden">
             {/* TOP NAVBAR */}
             <Navbar
                 openSideMenu={openSideMenu}
@@ -16,24 +16,26 @@ const DashboardLayout = ({ children }) => {
             />
 
             {user && (
-                <div className="flex relative">
-                    {/* SIDEBAR */}
-                    <SideMenu isOpen={openSideMenu} />
-
+                <>
                     {/* DARK OVERLAY - Only visible on mobile when sidebar is open */}
                     {openSideMenu && (
                         <div
-                            className="fixed inset-0 bg-black/50 z-30 lg:hidden top-[64px]"
+                            className="fixed inset-0 bg-black/60 z-30 lg:hidden"
+                            style={{ top: '64px' }}
                             onClick={() => setOpenSideMenu(false)}
-                            aria-hidden="true"
                         />
                     )}
 
-                    {/* MAIN CONTENT */}
-                    <main className="flex-1 px-5 pt-6 lg:ml-64 w-full min-w-0">
-                        {children}
-                    </main>
-                </div>
+                    <div className="flex overflow-x-hidden">
+                        {/* SIDEBAR */}
+                        <SideMenu isOpen={openSideMenu} />
+
+                        {/* MAIN CONTENT */}
+                        <main className="flex-1 px-5 pt-6 lg:ml-64 w-full min-w-0 max-w-full overflow-x-hidden">
+                            {children}
+                        </main>
+                    </div>
+                </>
             )}
         </div>
     );

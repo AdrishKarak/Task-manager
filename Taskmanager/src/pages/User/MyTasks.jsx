@@ -110,21 +110,23 @@ const MyTasks = () => {
 
     return (
         <DashboardLayout activeMenu="My Tasks">
-            <div className='my-5'>
+            <div className='my-5 w-full max-w-full overflow-x-hidden'>
                 {tabs.length > 0 && (
-                    <TaskStatusTabs
-                        tabs={tabs}
-                        activeTab={filterStatus}
-                        setActiveTab={setFilterStatus}
-                    />
+                    <div className='w-full overflow-x-auto'>
+                        <TaskStatusTabs
+                            tabs={tabs}
+                            activeTab={filterStatus}
+                            setActiveTab={setFilterStatus}
+                        />
+                    </div>
                 )}
 
                 {isLoading ? (
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 w-full'>
                         {[...Array(6)].map((_, i) => <TaskCardSkeleton key={i} />)}
                     </div>
                 ) : allTasks.length > 0 ? (
-                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6'>
+                    <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-6 w-full'>
                         {allTasks.map((task) => (
                             <TaskCard
                                 key={task._id}
@@ -136,7 +138,7 @@ const MyTasks = () => {
                         ))}
                     </div>
                 ) : (
-                    <div className='text-center py-12 text-gray-500'>
+                    <div className='text-center py-12 text-gray-500 w-full'>
                         <p className='text-lg'>No tasks found</p>
                         <p className='text-sm mt-2'>Tasks matching your filter will appear here</p>
                     </div>
