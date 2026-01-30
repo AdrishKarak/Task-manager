@@ -121,7 +121,7 @@ const ManageTasks = () => {
                             My Tasks
                         </h2>
                         <button
-                            className='flex lg:hidden download-btn items-center gap-2 flex-shrink-0'
+                            className='flex lg:hidden download-btn items-center gap-2 shrink-0'
                             onClick={handleDownloadReport}
                         >
                             <LuFileSpreadsheet className='text-lg' />
@@ -136,7 +136,7 @@ const ManageTasks = () => {
                                 setActiveTab={setFilterStatus}
                             />
                             <button
-                                className='download-btn hidden lg:flex items-center gap-2 flex-shrink-0 whitespace-nowrap'
+                                className='download-btn hidden lg:flex items-center gap-2 shrink-0 whitespace-nowrap'
                                 onClick={handleDownloadReport}
                             >
                                 <LuFileSpreadsheet className='text-lg' />
