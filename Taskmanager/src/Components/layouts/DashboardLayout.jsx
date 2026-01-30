@@ -16,12 +16,21 @@ const DashboardLayout = ({ children }) => {
             />
 
             {user && (
-                <div className="flex">
+                <div className="flex relative">
                     {/* SIDEBAR */}
                     <SideMenu isOpen={openSideMenu} />
 
+                    {/* DARK OVERLAY - Only visible on mobile when sidebar is open */}
+                    {openSideMenu && (
+                        <div
+                            className="fixed inset-0 bg-black/50 z-30 lg:hidden top-[64px]"
+                            onClick={() => setOpenSideMenu(false)}
+                            aria-hidden="true"
+                        />
+                    )}
+
                     {/* MAIN CONTENT */}
-                    <main className="flex-1 px-5 pt-6 lg:ml-64">
+                    <main className="flex-1 px-5 pt-6 lg:ml-64 w-full min-w-0">
                         {children}
                     </main>
                 </div>
